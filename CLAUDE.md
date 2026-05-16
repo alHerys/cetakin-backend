@@ -12,7 +12,7 @@ Laravel 11 API for an on-demand print and stationery (ATK) ordering platform. Pa
 | Framework | Laravel 13 |
 | Auth | tymon/jwt-auth |
 | Database | PostgreSQL 16 |
-| File Storage | Cloudinary |
+| File Storage | Cloudinary (`cloudinary/cloudinary_php` SDK — no Laravel wrapper, incompatible with Laravel 13) |
 | Containerization | Docker + Docker Compose |
 | CI/CD | Railway (auto-deploy on push to `main`) |
 | Testing | Pest |
