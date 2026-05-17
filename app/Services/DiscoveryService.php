@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\Shop;
 use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Facades\DB;
 
 class DiscoveryService
 {
@@ -13,7 +14,7 @@ class DiscoveryService
         $lng    = $filters['lng'];
         $radius = $filters['radius'] ?? 10;
 
-        $query = Shop::selectRaw("
+        $sub = DB::table('shops')->selectRaw("
             *,
             (6371 * acos(
                 cos(radians(?)) * cos(radians(latitude)) *
@@ -21,11 +22,12 @@ class DiscoveryService
                 sin(radians(?)) * sin(radians(latitude))
             )) AS distance_km
         ", [$lat, $lng, $lat])
-            ->with(['service', 'pricing'])
             ->where('status', 'approved')
             ->whereNotNull('latitude')
-            ->whereNotNull('longitude')
-            ->having('distance_km', '<=', $radius)
+            ->whereNotNull('longitude');
+
+        $query = Shop::fromSub($sub, 'shops')
+            ->where('distance_km', '<=', $radius)
             ->orderBy('distance_km');
 
         if (!empty($filters['min_rating'])) {
