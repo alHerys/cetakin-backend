@@ -7,16 +7,20 @@ use Illuminate\Http\UploadedFile;
 
 class CloudinaryService
 {
-    private Cloudinary $client;
+    private ?Cloudinary $client = null;
 
-    public function __construct()
+    private function client(): Cloudinary
     {
-        $this->client = new Cloudinary(env('CLOUDINARY_URL'));
+        if (!$this->client) {
+            $this->client = new Cloudinary(env('CLOUDINARY_URL'));
+        }
+
+        return $this->client;
     }
 
     public function upload(UploadedFile $file, string $folder): string
     {
-        $result = $this->client->uploadApi()->upload($file->getRealPath(), [
+        $result = $this->client()->uploadApi()->upload($file->getRealPath(), [
             'folder' => $folder,
         ]);
 
@@ -25,6 +29,6 @@ class CloudinaryService
 
     public function delete(string $publicId): void
     {
-        $this->client->uploadApi()->destroy($publicId);
+        $this->client()->uploadApi()->destroy($publicId);
     }
 }

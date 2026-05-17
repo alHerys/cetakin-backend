@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Casts\PgArray;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -17,10 +18,10 @@ class ShopService extends Model
     protected function casts(): array
     {
         return [
-            'paper_sizes' => 'array',
-            'color_modes' => 'array',
-            'sides'       => 'array',
-            'bindings'    => 'array',
+            'paper_sizes' => PgArray::class,
+            'color_modes' => PgArray::class,
+            'sides'       => PgArray::class,
+            'bindings'    => PgArray::class,
         ];
     }
 
