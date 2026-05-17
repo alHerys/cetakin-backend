@@ -10,6 +10,8 @@ class ShopPricing extends Model
 {
     use HasUuids;
 
+    protected $table = 'shop_pricing';
+
     public $timestamps = false;
 
     protected $fillable = [
