@@ -3,6 +3,8 @@
 use App\Http\Controllers\Admin\PartnerController as AdminPartnerController;
 use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\Discovery\DiscoveryController;
+use App\Http\Controllers\Order\PrintOrderController;
+use App\Http\Controllers\Partner\PartnerPrintOrderController;
 use App\Http\Controllers\Review\ReviewController;
 use App\Http\Controllers\Shop\AtkProductController;
 use App\Http\Controllers\Shop\ShopController;
@@ -28,6 +30,19 @@ Route::prefix('v1')->group(function () {
         Route::put('/me/services', [ShopServiceController::class, 'update']);
         Route::put('/me/pricing', [ShopPricingController::class, 'update']);
         Route::apiResource('/me/atk', AtkProductController::class)->parameters(['atk' => 'id']);
+    });
+
+    Route::prefix('orders/print')->middleware(['auth:api', 'role:user'])->group(function () {
+        Route::post('/', [PrintOrderController::class, 'store']);
+        Route::get('/', [PrintOrderController::class, 'index']);
+        Route::get('/{id}', [PrintOrderController::class, 'show']);
+        Route::post('/{id}/cancel', [PrintOrderController::class, 'cancel']);
+        Route::post('/{id}/review', [ReviewController::class, 'storePrintReview']);
+    });
+
+    Route::prefix('partner/orders/print')->middleware(['auth:api', 'role:partner', 'partner.approved'])->group(function () {
+        Route::get('/', [PartnerPrintOrderController::class, 'index']);
+        Route::patch('/{id}/status', [PartnerPrintOrderController::class, 'updateStatus']);
     });
 
     Route::prefix('shops')->middleware(['auth:api', 'role:user'])->group(function () {
