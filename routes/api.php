@@ -3,7 +3,9 @@
 use App\Http\Controllers\Admin\PartnerController as AdminPartnerController;
 use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\Discovery\DiscoveryController;
+use App\Http\Controllers\Order\AtkOrderController;
 use App\Http\Controllers\Order\PrintOrderController;
+use App\Http\Controllers\Partner\PartnerAtkOrderController;
 use App\Http\Controllers\Partner\PartnerPrintOrderController;
 use App\Http\Controllers\Review\ReviewController;
 use App\Http\Controllers\Shop\AtkProductController;
@@ -43,6 +45,18 @@ Route::prefix('v1')->group(function () {
     Route::prefix('partner/orders/print')->middleware(['auth:api', 'role:partner', 'partner.approved'])->group(function () {
         Route::get('/', [PartnerPrintOrderController::class, 'index']);
         Route::patch('/{id}/status', [PartnerPrintOrderController::class, 'updateStatus']);
+    });
+
+    Route::prefix('orders/atk')->middleware(['auth:api', 'role:user'])->group(function () {
+        Route::post('/', [AtkOrderController::class, 'store']);
+        Route::get('/', [AtkOrderController::class, 'index']);
+        Route::get('/{id}', [AtkOrderController::class, 'show']);
+        Route::post('/{id}/review', [ReviewController::class, 'storeAtkReview']);
+    });
+
+    Route::prefix('partner/orders/atk')->middleware(['auth:api', 'role:partner', 'partner.approved'])->group(function () {
+        Route::get('/', [PartnerAtkOrderController::class, 'index']);
+        Route::patch('/{id}/status', [PartnerAtkOrderController::class, 'updateStatus']);
     });
 
     Route::prefix('shops')->middleware(['auth:api', 'role:user'])->group(function () {
