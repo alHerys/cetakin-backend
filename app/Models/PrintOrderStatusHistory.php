@@ -10,6 +10,8 @@ class PrintOrderStatusHistory extends Model
 {
     use HasUuids;
 
+    protected $table = 'print_order_status_history';
+
     public $timestamps = false;
 
     protected $fillable = ['order_id', 'status'];

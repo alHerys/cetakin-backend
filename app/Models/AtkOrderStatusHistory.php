@@ -10,6 +10,8 @@ class AtkOrderStatusHistory extends Model
 {
     use HasUuids;
 
+    protected $table = 'atk_order_status_history';
+
     public $timestamps = false;
 
     protected $fillable = ['order_id', 'status'];
