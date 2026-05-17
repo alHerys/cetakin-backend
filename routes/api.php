@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Admin\PartnerController as AdminPartnerController;
 use App\Http\Controllers\Auth\AuthController;
 use Illuminate\Support\Facades\Route;
 
@@ -13,5 +14,11 @@ Route::prefix('v1')->group(function () {
             Route::post('/logout', [AuthController::class, 'logout']);
             Route::get('/me', [AuthController::class, 'me']);
         });
+    });
+
+    Route::prefix('admin')->middleware(['auth:api', 'role:admin'])->group(function () {
+        Route::get('/partners', [AdminPartnerController::class, 'index']);
+        Route::patch('/partners/{id}/approve', [AdminPartnerController::class, 'approve']);
+        Route::patch('/partners/{id}/reject', [AdminPartnerController::class, 'reject']);
     });
 });
