@@ -34,11 +34,11 @@ class OrderAtkService
                 $subtotal = $product->price * $item['quantity'];
 
                 $itemRows[] = [
-                    'atk_id'     => $product->id,
-                    'name'       => $product->name,
-                    'unit_price' => $product->price,
-                    'quantity'   => $item['quantity'],
-                    'subtotal'   => $subtotal,
+                    'atk_product_id' => $product->id,
+                    'name'           => $product->name,
+                    'unit_price'     => $product->price,
+                    'quantity'       => $item['quantity'],
+                    'subtotal'       => $subtotal,
                 ];
 
                 $finalPrice += $subtotal;
