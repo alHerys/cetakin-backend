@@ -38,7 +38,11 @@ return Application::configure(basePath: dirname(__DIR__))
 
         $exceptions->render(function (NotFoundHttpException $e, Request $request) use ($json) {
             if ($json($request)) {
-                return response()->json(['status' => 'error', 'message' => 'Endpoint not found.'], 404);
+                $message = $e->getPrevious() instanceof ModelNotFoundException
+                    ? 'Resource not found.'
+                    : 'Endpoint not found.';
+
+                return response()->json(['status' => 'error', 'message' => $message], 404);
             }
         });
 
