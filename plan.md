@@ -7,7 +7,7 @@
 
 | Layer | Technology |
 |-------|-----------|
-| Language | PHP 8.2 |
+| Language | PHP 8.3 |
 | Framework | Laravel 13 |
 | Auth | tymon/jwt-auth |
 | Database | PostgreSQL |

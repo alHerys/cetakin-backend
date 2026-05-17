@@ -8,7 +8,7 @@ Laravel 11 API for an on-demand print and stationery (ATK) ordering platform. Pa
 
 | Layer | Technology |
 |---|---|
-| Language | PHP 8.2 |
+| Language | PHP 8.3 |
 | Framework | Laravel 13 |
 | Auth | tymon/jwt-auth |
 | Database | PostgreSQL 16 |
