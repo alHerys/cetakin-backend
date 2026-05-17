@@ -66,6 +66,11 @@ Route::prefix('v1')->group(function () {
         Route::get('/{id}/reviews', [ReviewController::class, 'shopReviews']);
     });
 
+    Route::prefix('reviews')->middleware(['auth:api', 'role:user'])->group(function () {
+        Route::get('/me', [ReviewController::class, 'myReviews']);
+        Route::get('/me/{id}', [ReviewController::class, 'myReview']);
+    });
+
     Route::prefix('admin')->middleware(['auth:api', 'role:admin'])->group(function () {
         Route::get('/partners', [AdminPartnerController::class, 'index']);
         Route::patch('/partners/{id}/approve', [AdminPartnerController::class, 'approve']);
