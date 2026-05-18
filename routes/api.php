@@ -3,6 +3,7 @@
 use App\Http\Controllers\Admin\PartnerController as AdminPartnerController;
 use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\Discovery\DiscoveryController;
+use App\Http\Controllers\HealthController;
 use App\Http\Controllers\Order\AtkOrderController;
 use App\Http\Controllers\Order\PrintOrderController;
 use App\Http\Controllers\Partner\PartnerAtkOrderController;
@@ -15,6 +16,8 @@ use App\Http\Controllers\Shop\ShopServiceController;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('v1')->group(function () {
+    Route::get('/health', HealthController::class);
+
     Route::prefix('auth')->group(function () {
         Route::post('/register', [AuthController::class, 'register']);
         Route::post('/register/partner', [AuthController::class, 'registerPartner']);

@@ -90,6 +90,25 @@ docker compose exec app php artisan db:seed   # creates the admin account
 
 ### 4. Verify
 
+Check that the API and database are up:
+
+```bash
+curl http://localhost:8000/api/v1/health
+```
+
+Expected response:
+
+```json
+{
+  "status": "ok",
+  "services": {
+    "database": "ok"
+  }
+}
+```
+
+Then verify authentication:
+
 ```bash
 curl http://localhost:8000/api/v1/auth/login \
   -H "Content-Type: application/json" \
