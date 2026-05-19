@@ -874,6 +874,23 @@
           }
         },
         {
+          "name": "Edit Profile",
+          "request": {
+            "method": "PUT",
+            "url": "{{base_url}}/auth/me",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Accept", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Budi Updated\",\n  \"email\": \"budi.new@example.com\",\n  \"phone\": \"08111222333\"\n}"
+            },
+            "description": "All fields are optional. Email must be unique."
+          }
+        },
+        {
           "name": "Update Avatar",
           "request": {
             "method": "POST",

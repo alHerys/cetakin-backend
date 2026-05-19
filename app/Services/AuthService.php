@@ -94,4 +94,12 @@ class AuthService
 
         return $user;
     }
+
+    public function updateProfile(array $data): User
+    {
+        $user = auth('api')->user();
+        $user->update($data);
+
+        return $user->fresh();
+    }
 }

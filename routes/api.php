@@ -26,6 +26,7 @@ Route::prefix('v1')->group(function () {
         Route::middleware('auth:api')->group(function () {
             Route::post('/logout', [AuthController::class, 'logout']);
             Route::get('/me', [AuthController::class, 'me']);
+            Route::put('/me', [AuthController::class, 'updateProfile']);
             Route::post('/me/avatar', [AuthController::class, 'updateAvatar']);
         });
     });

@@ -254,6 +254,39 @@ Get the currently authenticated user's profile.
 
 ---
 
+### PUT `/auth/me`
+Update the authenticated user's profile. All fields are optional.
+
+**Access:** Authenticated (all roles)
+
+**Request:**
+```json
+{
+  "name": "Budi Updated",
+  "email": "budi.new@example.com",
+  "phone": "08111222333"
+}
+```
+
+**Response `200`:**
+```json
+{
+  "success": true,
+  "message": "Profile updated successfully",
+  "data": {
+    "id": "uuid",
+    "name": "Budi Updated",
+    "email": "budi.new@example.com",
+    "phone": "08111222333",
+    "role": "user",
+    "avatar_url": null,
+    "created_at": "2025-01-01T10:00:00Z"
+  }
+}
+```
+
+---
+
 ### POST `/auth/me/avatar`
 Upload or replace the authenticated user's profile photo.
 
