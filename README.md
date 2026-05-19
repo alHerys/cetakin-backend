@@ -167,6 +167,8 @@ All endpoints are prefixed with `/api/v1`. Protected endpoints require a `Bearer
 | `POST` | `/auth/login` | Public | Log in and receive a JWT |
 | `POST` | `/auth/logout` | Auth | Invalidate the current token |
 | `GET` | `/auth/me` | Auth | Get the authenticated user's profile |
+| `PUT` | `/auth/me` | Auth | Update name, email, or phone |
+| `POST` | `/auth/me/avatar` | Auth | Upload a profile photo |
 
 ### Admin
 
