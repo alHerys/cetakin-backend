@@ -108,6 +108,24 @@
           }
         },
         {
+          "name": "Update Avatar",
+          "request": {
+            "method": "POST",
+            "url": "{{base_url}}/auth/me/avatar",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Accept", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                { "key": "avatar", "type": "file", "src": "", "description": "Image file (jpg, jpeg, png, webp), max 2MB" }
+              ]
+            },
+            "description": "Upload a profile photo. Accepted formats: jpg, jpeg, png, webp. Max size: 2MB."
+          }
+        },
+        {
           "name": "Logout",
           "request": {
             "method": "POST",

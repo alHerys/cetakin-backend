@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\LoginRequest;
 use App\Http\Requests\Auth\RegisterPartnerRequest;
 use App\Http\Requests\Auth\RegisterUserRequest;
+use App\Http\Requests\Auth\UpdateAvatarRequest;
 use App\Services\AuthService;
 use App\Traits\ApiResponse;
 use Illuminate\Http\JsonResponse;
@@ -59,5 +60,12 @@ class AuthController extends Controller
     public function me(): JsonResponse
     {
         return $this->success($this->authService->me(), 'Authenticated user.');
+    }
+
+    public function updateAvatar(UpdateAvatarRequest $request): JsonResponse
+    {
+        $user = $this->authService->updateAvatar($request->file('avatar'));
+
+        return $this->success($user, 'Avatar updated successfully.');
     }
 }

@@ -85,4 +85,13 @@ class AuthService
     {
         return auth('api')->user();
     }
+
+    public function updateAvatar(mixed $file): User
+    {
+        $user = auth('api')->user();
+        $url  = $this->cloudinary->upload($file, 'avatars');
+        $user->update(['avatar_url' => $url]);
+
+        return $user;
+    }
 }
