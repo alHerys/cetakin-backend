@@ -63,6 +63,35 @@ For errors:
 
 ---
 
+## 0. Health
+
+### GET `/health`
+Check API and database connectivity.
+
+**Access:** Public
+
+**Response `200`:**
+```json
+{
+  "status": "ok",
+  "services": {
+    "database": "ok"
+  }
+}
+```
+
+**Response `503`** (if database is unreachable):
+```json
+{
+  "status": "degraded",
+  "services": {
+    "database": "error"
+  }
+}
+```
+
+---
+
 ## 1. Authentication
 
 ### POST `/auth/register`
@@ -218,6 +247,36 @@ Get the currently authenticated user's profile.
     "email": "budi@email.com",
     "phone": "08123456789",
     "role": "user",
+    "created_at": "2025-01-01T10:00:00Z"
+  }
+}
+```
+
+---
+
+### POST `/auth/me/avatar`
+Upload or replace the authenticated user's profile photo.
+
+**Access:** Authenticated (all roles)
+
+**Request:** `multipart/form-data`
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| avatar | file | Yes | Image file (jpg, jpeg, png, webp), max 2MB |
+
+**Response `200`:**
+```json
+{
+  "success": true,
+  "message": "Avatar updated successfully",
+  "data": {
+    "id": "uuid",
+    "name": "Budi Santoso",
+    "email": "budi@email.com",
+    "phone": "08123456789",
+    "role": "user",
+    "avatar_url": "https://res.cloudinary.com/...",
     "created_at": "2025-01-01T10:00:00Z"
   }
 }
@@ -1246,6 +1305,7 @@ Get detail of a specific review submitted by the authenticated user.
 
 | Endpoint Group | User | Partner | Admin |
 |----------------|------|---------|-------|
+| Health | Public | Public | Public |
 | Auth | Yes | Yes | Yes |
 | Admin endpoints | No | No | Yes |
 | Shop management (`/shops/me`) | No | Yes | No |
