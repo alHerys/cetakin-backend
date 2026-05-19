@@ -71,7 +71,28 @@ cd cetakin-backend
 cp .env.example .env   # then fill in the required values (see below)
 ```
 
-### 2. Start the containers
+### 2. Install dependencies
+
+```bash
+composer install
+```
+
+> If you don't have PHP/Composer locally, skip this — Docker handles it in the next step.
+
+### 3. Generate application keys
+
+```bash
+php artisan key:generate
+php artisan jwt:secret
+```
+
+> Again, if running without local PHP, you can run these inside the container after step 4:
+> ```bash
+> docker compose exec app php artisan key:generate
+> docker compose exec app php artisan jwt:secret
+> ```
+
+### 4. Start the containers
 
 ```bash
 docker compose up -d --build
@@ -81,14 +102,14 @@ This starts two containers:
 - `app` — Laravel on port `8000`
 - `db` — PostgreSQL 16
 
-### 3. Run migrations and seed
+### 5. Run migrations and seed
 
 ```bash
 docker compose exec app php artisan migrate
 docker compose exec app php artisan db:seed   # creates the admin account
 ```
 
-### 4. Verify
+### 6. Verify
 
 Check that the API and database are up:
 
