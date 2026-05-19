@@ -1,7 +1,7 @@
 {
   "info": {
     "name": "Cetakin API",
-    "description": "REST API for Cetakin — an on-demand print and stationery ordering platform.\n\n**Setup:**\n1. Set `base_url` variable to `http://localhost:8000/api/v1`\n2. Login with any account → copy the `token` from the response\n3. Set `token` variable — all protected requests use it automatically",
+    "description": "REST API for Cetakin — an on-demand print and stationery ordering platform.\n\nThis collection is ordered as a complete app workflow:\n1. Health check\n2. Admin approves a partner\n3. Partner sets up their shop\n4. Customer discovers shops and places orders\n5. Partner processes the orders\n6. Customer reviews\n\n**Setup:**\n- `base_url` is pre-set to `http://localhost:8000/api/v1`\n- `token` is auto-saved on every Login request — no manual copy-paste needed\n- Replace `:id` path variables with real UUIDs from previous responses as you go",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "variable": [
@@ -18,53 +18,25 @@
   ],
   "item": [
     {
-      "name": "Health",
+      "name": "Step 1 — Health Check",
+      "description": "Verify the API and database are up before anything else.",
       "item": [
         {
           "name": "Health Check",
           "request": {
             "method": "GET",
             "url": "{{base_url}}/health",
-            "description": "Check API and database connectivity. No auth required."
+            "description": "Public endpoint. Returns 200 if API and DB are up, 503 if DB is unreachable."
           }
         }
       ]
     },
     {
-      "name": "Auth",
+      "name": "Step 2 — Admin Approves a Partner",
+      "description": "Admin logs in, a partner registers, admin reviews and approves them.",
       "item": [
         {
-          "name": "Register (Customer)",
-          "request": {
-            "method": "POST",
-            "url": "{{base_url}}/auth/register",
-            "header": [
-              { "key": "Content-Type", "value": "application/json" },
-              { "key": "Accept", "value": "application/json" }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"name\": \"John Customer\",\n  \"email\": \"john@example.com\",\n  \"password\": \"password123\",\n  \"password_confirmation\": \"password123\"\n}"
-            }
-          }
-        },
-        {
-          "name": "Register (Partner)",
-          "request": {
-            "method": "POST",
-            "url": "{{base_url}}/auth/register/partner",
-            "header": [
-              { "key": "Content-Type", "value": "application/json" },
-              { "key": "Accept", "value": "application/json" }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"name\": \"Jane Partner\",\n  \"email\": \"jane@printshop.com\",\n  \"password\": \"password123\",\n  \"password_confirmation\": \"password123\",\n  \"shop_name\": \"Jane Print Shop\",\n  \"shop_address\": \"Jl. Contoh No. 1, Jakarta\",\n  \"shop_latitude\": -6.2088,\n  \"shop_longitude\": 106.8456,\n  \"shop_phone\": \"08123456789\"\n}"
-            }
-          }
-        },
-        {
-          "name": "Login",
+          "name": "Login as Admin",
           "request": {
             "method": "POST",
             "url": "{{base_url}}/auth/login",
@@ -76,7 +48,7 @@
               "mode": "raw",
               "raw": "{\n  \"email\": \"admin@printapp.com\",\n  \"password\": \"admin123\"\n}"
             },
-            "description": "Token is automatically extracted and saved to the `token` collection variable after a successful login."
+            "description": "Token is automatically saved to the `token` collection variable."
           },
           "event": [
             {
@@ -97,52 +69,23 @@
           ]
         },
         {
-          "name": "Me",
-          "request": {
-            "method": "GET",
-            "url": "{{base_url}}/auth/me",
-            "header": [
-              { "key": "Authorization", "value": "Bearer {{token}}" },
-              { "key": "Accept", "value": "application/json" }
-            ]
-          }
-        },
-        {
-          "name": "Update Avatar",
+          "name": "Register a Partner",
           "request": {
             "method": "POST",
-            "url": "{{base_url}}/auth/me/avatar",
+            "url": "{{base_url}}/auth/register/partner",
             "header": [
-              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Content-Type", "value": "application/json" },
               { "key": "Accept", "value": "application/json" }
             ],
             "body": {
-              "mode": "formdata",
-              "formdata": [
-                { "key": "avatar", "type": "file", "src": "", "description": "Image file (jpg, jpeg, png, webp), max 2MB" }
-              ]
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Jane Partner\",\n  \"email\": \"jane@printshop.com\",\n  \"password\": \"password123\",\n  \"password_confirmation\": \"password123\",\n  \"phone\": \"08123456789\",\n  \"shop_name\": \"Jane Print Shop\",\n  \"shop_address\": \"Jl. Contoh No. 1, Jakarta\",\n  \"shop_phone\": \"08123456789\",\n  \"shop_description\": \"Melayani cetak dokumen dan ATK\",\n  \"open_time\": \"08:00\",\n  \"close_time\": \"21:00\",\n  \"operating_days\": [\"Monday\", \"Tuesday\", \"Wednesday\", \"Thursday\", \"Friday\"],\n  \"latitude\": -6.2088,\n  \"longitude\": 106.8456\n}"
             },
-            "description": "Upload a profile photo. Accepted formats: jpg, jpeg, png, webp. Max size: 2MB."
+            "description": "Shop status starts as `pending`. Copy the `shop.id` from the response for the next two requests."
           }
         },
         {
-          "name": "Logout",
-          "request": {
-            "method": "POST",
-            "url": "{{base_url}}/auth/logout",
-            "header": [
-              { "key": "Authorization", "value": "Bearer {{token}}" },
-              { "key": "Accept", "value": "application/json" }
-            ]
-          }
-        }
-      ]
-    },
-    {
-      "name": "Admin",
-      "item": [
-        {
-          "name": "List Partners",
+          "name": "List Pending Partners",
           "request": {
             "method": "GET",
             "url": {
@@ -156,28 +99,29 @@
             "header": [
               { "key": "Authorization", "value": "Bearer {{token}}" },
               { "key": "Accept", "value": "application/json" }
-            ]
+            ],
+            "description": "Admin reviews all pending registrations. Copy the shop `id` from here."
           }
         },
         {
           "name": "Approve Partner",
           "request": {
             "method": "PATCH",
-            "url": "{{base_url}}/admin/partners/:id/approve",
-            "header": [
-              { "key": "Authorization", "value": "Bearer {{token}}" },
-              { "key": "Accept", "value": "application/json" }
-            ],
             "url": {
               "raw": "{{base_url}}/admin/partners/:id/approve",
               "host": ["{{base_url}}"],
               "path": ["admin", "partners", ":id", "approve"],
               "variable": [{ "key": "id", "value": "<shop_id>" }]
-            }
+            },
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Accept", "value": "application/json" }
+            ],
+            "description": "Approve the partner. After this, the partner can operate their shop."
           }
         },
         {
-          "name": "Reject Partner",
+          "name": "Reject Partner (alternative)",
           "request": {
             "method": "PATCH",
             "url": {
@@ -194,113 +138,59 @@
             "body": {
               "mode": "raw",
               "raw": "{\n  \"reason\": \"Incomplete registration documents.\"\n}"
-            }
+            },
+            "description": "Alternative to approve — reject with a reason. Skip this if you approved above."
           }
         }
       ]
     },
     {
-      "name": "Shop Discovery (Customer)",
+      "name": "Step 3 — Partner Sets Up Shop",
+      "description": "The approved partner logs in and configures their shop: services, pricing, and ATK catalog.",
       "item": [
         {
-          "name": "Discover Nearby Shops",
+          "name": "Login as Partner",
           "request": {
-            "method": "GET",
-            "url": {
-              "raw": "{{base_url}}/shops?lat=-6.2088&lng=106.8456&radius=5&min_rating=0",
-              "host": ["{{base_url}}"],
-              "path": ["shops"],
-              "query": [
-                { "key": "lat", "value": "-6.2088", "description": "Latitude" },
-                { "key": "lng", "value": "106.8456", "description": "Longitude" },
-                { "key": "radius", "value": "5", "description": "Radius in km" },
-                { "key": "min_rating", "value": "0", "description": "Minimum average rating" }
-              ]
-            },
+            "method": "POST",
+            "url": "{{base_url}}/auth/login",
             "header": [
-              { "key": "Authorization", "value": "Bearer {{token}}" },
-              { "key": "Accept", "value": "application/json" }
-            ]
-          }
-        },
-        {
-          "name": "Get Shop Detail",
-          "request": {
-            "method": "GET",
-            "url": {
-              "raw": "{{base_url}}/shops/:id",
-              "host": ["{{base_url}}"],
-              "path": ["shops", ":id"],
-              "variable": [{ "key": "id", "value": "<shop_id>" }]
-            },
-            "header": [
-              { "key": "Authorization", "value": "Bearer {{token}}" },
-              { "key": "Accept", "value": "application/json" }
-            ]
-          }
-        },
-        {
-          "name": "Get Shop ATK Catalog",
-          "request": {
-            "method": "GET",
-            "url": {
-              "raw": "{{base_url}}/shops/:id/atk",
-              "host": ["{{base_url}}"],
-              "path": ["shops", ":id", "atk"],
-              "variable": [{ "key": "id", "value": "<shop_id>" }]
-            },
-            "header": [
-              { "key": "Authorization", "value": "Bearer {{token}}" },
-              { "key": "Accept", "value": "application/json" }
-            ]
-          }
-        },
-        {
-          "name": "Get Shop Reviews",
-          "request": {
-            "method": "GET",
-            "url": {
-              "raw": "{{base_url}}/shops/:id/reviews",
-              "host": ["{{base_url}}"],
-              "path": ["shops", ":id", "reviews"],
-              "variable": [{ "key": "id", "value": "<shop_id>" }]
-            },
-            "header": [
-              { "key": "Authorization", "value": "Bearer {{token}}" },
-              { "key": "Accept", "value": "application/json" }
-            ]
-          }
-        }
-      ]
-    },
-    {
-      "name": "Partner — Shop Management",
-      "item": [
-        {
-          "name": "Get My Shop",
-          "request": {
-            "method": "GET",
-            "url": "{{base_url}}/shops/me",
-            "header": [
-              { "key": "Authorization", "value": "Bearer {{token}}" },
-              { "key": "Accept", "value": "application/json" }
-            ]
-          }
-        },
-        {
-          "name": "Update My Shop",
-          "request": {
-            "method": "PUT",
-            "url": "{{base_url}}/shops/me",
-            "header": [
-              { "key": "Authorization", "value": "Bearer {{token}}" },
               { "key": "Content-Type", "value": "application/json" },
               { "key": "Accept", "value": "application/json" }
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"name\": \"Updated Print Shop\",\n  \"address\": \"Jl. Baru No. 99, Jakarta\",\n  \"phone\": \"08198765432\",\n  \"latitude\": -6.2100,\n  \"longitude\": 106.8500\n}"
+              "raw": "{\n  \"email\": \"jane@printshop.com\",\n  \"password\": \"password123\"\n}"
+            },
+            "description": "Token is automatically saved, replacing the admin token."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const res = pm.response.json();",
+                  "if (res.data && res.data.token) {",
+                  "    pm.collectionVariables.set('token', res.data.token);",
+                  "    console.log('Token saved automatically.');",
+                  "} else {",
+                  "    console.warn('Login response did not contain a token. Check credentials.');",
+                  "}"
+                ]
+              }
             }
+          ]
+        },
+        {
+          "name": "View My Shop",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/shops/me",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Accept", "value": "application/json" }
+            ],
+            "description": "Partner views their own shop profile."
           }
         },
         {
@@ -334,22 +224,6 @@
               "raw": "{\n  \"bw_price\": 500,\n  \"color_price\": 1500,\n  \"binding_prices\": [5000, 10000, 15000]\n}"
             }
           }
-        }
-      ]
-    },
-    {
-      "name": "Partner — ATK Catalog",
-      "item": [
-        {
-          "name": "List My ATK Products",
-          "request": {
-            "method": "GET",
-            "url": "{{base_url}}/shops/me/atk",
-            "header": [
-              { "key": "Authorization", "value": "Bearer {{token}}" },
-              { "key": "Accept", "value": "application/json" }
-            ]
-          }
         },
         {
           "name": "Add ATK Product",
@@ -364,11 +238,560 @@
             "body": {
               "mode": "raw",
               "raw": "{\n  \"name\": \"Pulpen Pilot G2\",\n  \"description\": \"Pulpen gel hitam 0.5mm\",\n  \"price\": 8000,\n  \"stock\": 100,\n  \"is_available\": true\n}"
+            },
+            "description": "Add a product to the shop's ATK catalog. Copy the product `id` for later."
+          }
+        },
+        {
+          "name": "View My ATK Catalog",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/shops/me/atk",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Accept", "value": "application/json" }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Step 4 — Customer Discovers & Orders",
+      "description": "Customer registers, discovers the shop, and places both a print order and an ATK order.",
+      "item": [
+        {
+          "name": "Register as Customer",
+          "request": {
+            "method": "POST",
+            "url": "{{base_url}}/auth/register",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Accept", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Budi Customer\",\n  \"email\": \"budi@example.com\",\n  \"password\": \"password123\",\n  \"password_confirmation\": \"password123\",\n  \"phone\": \"08198765432\"\n}"
+            },
+            "description": "Token is automatically saved after registration."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const res = pm.response.json();",
+                  "if (res.data && res.data.token) {",
+                  "    pm.collectionVariables.set('token', res.data.token);",
+                  "    console.log('Token saved automatically.');",
+                  "} else {",
+                  "    console.warn('Token not found in response.');",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Discover Nearby Shops",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/shops?lat=-6.2088&lng=106.8456&radius=10&min_rating=0",
+              "host": ["{{base_url}}"],
+              "path": ["shops"],
+              "query": [
+                { "key": "lat", "value": "-6.2088", "description": "User's latitude" },
+                { "key": "lng", "value": "106.8456", "description": "User's longitude" },
+                { "key": "radius", "value": "10", "description": "Radius in km" },
+                { "key": "min_rating", "value": "0", "description": "Minimum average rating" }
+              ]
+            },
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Accept", "value": "application/json" }
+            ],
+            "description": "Returns nearby approved shops sorted by distance. Copy the shop `id` from results."
+          }
+        },
+        {
+          "name": "View Shop Detail",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/shops/:id",
+              "host": ["{{base_url}}"],
+              "path": ["shops", ":id"],
+              "variable": [{ "key": "id", "value": "<shop_id>" }]
+            },
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Accept", "value": "application/json" }
+            ],
+            "description": "Full shop info including services and pricing."
+          }
+        },
+        {
+          "name": "Browse Shop ATK Catalog",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/shops/:id/atk",
+              "host": ["{{base_url}}"],
+              "path": ["shops", ":id", "atk"],
+              "variable": [{ "key": "id", "value": "<shop_id>" }]
+            },
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Accept", "value": "application/json" }
+            ],
+            "description": "Browse available ATK products. Copy a product `id` for the ATK order."
+          }
+        },
+        {
+          "name": "Place Print Order",
+          "request": {
+            "method": "POST",
+            "url": "{{base_url}}/orders/print",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Accept", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                { "key": "shop_id", "value": "<shop_id>", "type": "text" },
+                { "key": "file", "type": "file", "src": "", "description": "Attach a real PDF, max 10MB" },
+                { "key": "total_pages", "value": "5", "type": "text" },
+                { "key": "color_mode", "value": "bw", "type": "text", "description": "bw or color" },
+                { "key": "copies", "value": "1", "type": "text" },
+                { "key": "binding", "value": "false", "type": "text" },
+                { "key": "notes", "value": "Please print double-sided", "type": "text" }
+              ]
+            },
+            "description": "Multipart/form-data. Attach a real PDF. Copy the order `id` from the response."
+          }
+        },
+        {
+          "name": "Place ATK Order",
+          "request": {
+            "method": "POST",
+            "url": "{{base_url}}/orders/atk",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Accept", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"shop_id\": \"<shop_id>\",\n  \"items\": [\n    { \"atk_id\": \"<atk_product_id>\", \"quantity\": 2 }\n  ],\n  \"notes\": \"Please wrap carefully\"\n}"
+            },
+            "description": "Stock is decremented immediately. Copy the order `id` from the response."
+          }
+        },
+        {
+          "name": "View My Print Orders",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/orders/print",
+              "host": ["{{base_url}}"],
+              "path": ["orders", "print"],
+              "query": [
+                { "key": "status", "value": "pending", "disabled": true, "description": "Filter: pending | confirmed | processing | ready_for_pickup | completed | cancelled" }
+              ]
+            },
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Accept", "value": "application/json" }
+            ]
+          }
+        },
+        {
+          "name": "View Print Order Detail",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/orders/print/:id",
+              "host": ["{{base_url}}"],
+              "path": ["orders", "print", ":id"],
+              "variable": [{ "key": "id", "value": "<order_id>" }]
+            },
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Accept", "value": "application/json" }
+            ],
+            "description": "Shows full order detail including status history timeline."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Step 5 — Partner Processes Orders",
+      "description": "Partner logs back in and advances order statuses through the pipeline.",
+      "item": [
+        {
+          "name": "Login as Partner",
+          "request": {
+            "method": "POST",
+            "url": "{{base_url}}/auth/login",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Accept", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"jane@printshop.com\",\n  \"password\": \"password123\"\n}"
+            },
+            "description": "Token is automatically saved, replacing the customer token."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const res = pm.response.json();",
+                  "if (res.data && res.data.token) {",
+                  "    pm.collectionVariables.set('token', res.data.token);",
+                  "    console.log('Token saved automatically.');",
+                  "} else {",
+                  "    console.warn('Login response did not contain a token. Check credentials.');",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "View Incoming Print Orders",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/partner/orders/print?status=pending",
+              "host": ["{{base_url}}"],
+              "path": ["partner", "orders", "print"],
+              "query": [
+                { "key": "status", "value": "pending", "description": "Filter by status" }
+              ]
+            },
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Accept", "value": "application/json" }
+            ]
+          }
+        },
+        {
+          "name": "Advance Print Order → confirmed",
+          "request": {
+            "method": "PATCH",
+            "url": {
+              "raw": "{{base_url}}/partner/orders/print/:id/status",
+              "host": ["{{base_url}}"],
+              "path": ["partner", "orders", "print", ":id", "status"],
+              "variable": [{ "key": "id", "value": "<order_id>" }]
+            },
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Accept", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"confirmed\"\n}"
+            },
+            "description": "Flow: pending → confirmed → processing → ready_for_pickup → completed. No skipping allowed."
+          }
+        },
+        {
+          "name": "Advance Print Order → completed",
+          "request": {
+            "method": "PATCH",
+            "url": {
+              "raw": "{{base_url}}/partner/orders/print/:id/status",
+              "host": ["{{base_url}}"],
+              "path": ["partner", "orders", "print", ":id", "status"],
+              "variable": [{ "key": "id", "value": "<order_id>" }]
+            },
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Accept", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"completed\"\n}"
+            },
+            "description": "Order must be at ready_for_pickup before this. After completed, customer can review."
+          }
+        },
+        {
+          "name": "View Incoming ATK Orders",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/partner/orders/atk?status=pending",
+              "host": ["{{base_url}}"],
+              "path": ["partner", "orders", "atk"],
+              "query": [
+                { "key": "status", "value": "pending", "description": "Filter by status" }
+              ]
+            },
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Accept", "value": "application/json" }
+            ]
+          }
+        },
+        {
+          "name": "Advance ATK Order → confirmed",
+          "request": {
+            "method": "PATCH",
+            "url": {
+              "raw": "{{base_url}}/partner/orders/atk/:id/status",
+              "host": ["{{base_url}}"],
+              "path": ["partner", "orders", "atk", ":id", "status"],
+              "variable": [{ "key": "id", "value": "<order_id>" }]
+            },
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Accept", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"confirmed\"\n}"
             }
           }
         },
         {
-          "name": "Get ATK Product",
+          "name": "Advance ATK Order → completed",
+          "request": {
+            "method": "PATCH",
+            "url": {
+              "raw": "{{base_url}}/partner/orders/atk/:id/status",
+              "host": ["{{base_url}}"],
+              "path": ["partner", "orders", "atk", ":id", "status"],
+              "variable": [{ "key": "id", "value": "<order_id>" }]
+            },
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Accept", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"completed\"\n}"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Step 6 — Customer Reviews",
+      "description": "Customer logs back in and submits reviews for completed orders. Shop rating updates automatically via DB trigger.",
+      "item": [
+        {
+          "name": "Login as Customer",
+          "request": {
+            "method": "POST",
+            "url": "{{base_url}}/auth/login",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Accept", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"budi@example.com\",\n  \"password\": \"password123\"\n}"
+            },
+            "description": "Token is automatically saved, replacing the partner token."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const res = pm.response.json();",
+                  "if (res.data && res.data.token) {",
+                  "    pm.collectionVariables.set('token', res.data.token);",
+                  "    console.log('Token saved automatically.');",
+                  "} else {",
+                  "    console.warn('Login response did not contain a token. Check credentials.');",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Review Print Order",
+          "request": {
+            "method": "POST",
+            "url": {
+              "raw": "{{base_url}}/orders/print/:id/review",
+              "host": ["{{base_url}}"],
+              "path": ["orders", "print", ":id", "review"],
+              "variable": [{ "key": "id", "value": "<order_id>" }]
+            },
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Accept", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"rating\": 5,\n  \"comment\": \"Fast and good quality!\"\n}"
+            },
+            "description": "Order must be completed. One review per order — duplicates return 422."
+          }
+        },
+        {
+          "name": "Review ATK Order",
+          "request": {
+            "method": "POST",
+            "url": {
+              "raw": "{{base_url}}/orders/atk/:id/review",
+              "host": ["{{base_url}}"],
+              "path": ["orders", "atk", ":id", "review"],
+              "variable": [{ "key": "id", "value": "<order_id>" }]
+            },
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Accept", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"rating\": 4,\n  \"comment\": \"Good products, fast service!\"\n}"
+            },
+            "description": "Order must be completed. One review per order — duplicates return 422."
+          }
+        },
+        {
+          "name": "View Shop Reviews (rating updated)",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/shops/:id/reviews",
+              "host": ["{{base_url}}"],
+              "path": ["shops", ":id", "reviews"],
+              "variable": [{ "key": "id", "value": "<shop_id>" }]
+            },
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Accept", "value": "application/json" }
+            ],
+            "description": "Confirm the review appears and the shop's average_rating has updated automatically."
+          }
+        },
+        {
+          "name": "My Reviews",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/reviews/me",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Accept", "value": "application/json" }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Extra — Other Endpoints",
+      "description": "Endpoints not part of the main demo flow but available in the API.",
+      "item": [
+        {
+          "name": "Get My Profile",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/auth/me",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Accept", "value": "application/json" }
+            ]
+          }
+        },
+        {
+          "name": "Update Avatar",
+          "request": {
+            "method": "POST",
+            "url": "{{base_url}}/auth/me/avatar",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Accept", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                { "key": "avatar", "type": "file", "src": "", "description": "Image file (jpg, jpeg, png, webp), max 2MB" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Logout",
+          "request": {
+            "method": "POST",
+            "url": "{{base_url}}/auth/logout",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Accept", "value": "application/json" }
+            ]
+          }
+        },
+        {
+          "name": "Cancel Print Order",
+          "request": {
+            "method": "POST",
+            "url": {
+              "raw": "{{base_url}}/orders/print/:id/cancel",
+              "host": ["{{base_url}}"],
+              "path": ["orders", "print", ":id", "cancel"],
+              "variable": [{ "key": "id", "value": "<order_id>" }]
+            },
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Accept", "value": "application/json" }
+            ],
+            "description": "Customer only. Order must be in `pending` status."
+          }
+        },
+        {
+          "name": "Get ATK Order Detail",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/orders/atk/:id",
+              "host": ["{{base_url}}"],
+              "path": ["orders", "atk", ":id"],
+              "variable": [{ "key": "id", "value": "<order_id>" }]
+            },
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Accept", "value": "application/json" }
+            ]
+          }
+        },
+        {
+          "name": "Get Single Review",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/reviews/me/:id",
+              "host": ["{{base_url}}"],
+              "path": ["reviews", "me", ":id"],
+              "variable": [{ "key": "id", "value": "<review_id>" }]
+            },
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Accept", "value": "application/json" }
+            ]
+          }
+        },
+        {
+          "name": "Get Single ATK Product (Partner)",
           "request": {
             "method": "GET",
             "url": {
@@ -384,7 +807,7 @@
           }
         },
         {
-          "name": "Update ATK Product",
+          "name": "Update ATK Product (Partner)",
           "request": {
             "method": "PUT",
             "url": {
@@ -405,7 +828,7 @@
           }
         },
         {
-          "name": "Delete ATK Product",
+          "name": "Delete ATK Product (Partner)",
           "request": {
             "method": "DELETE",
             "url": {
@@ -419,96 +842,12 @@
               { "key": "Accept", "value": "application/json" }
             ]
           }
-        }
-      ]
-    },
-    {
-      "name": "Print Orders (Customer)",
-      "item": [
-        {
-          "name": "Place Print Order",
-          "request": {
-            "method": "POST",
-            "url": "{{base_url}}/orders/print",
-            "header": [
-              { "key": "Authorization", "value": "Bearer {{token}}" },
-              { "key": "Accept", "value": "application/json" }
-            ],
-            "body": {
-              "mode": "formdata",
-              "formdata": [
-                { "key": "shop_id", "value": "<shop_id>", "type": "text" },
-                { "key": "file", "type": "file", "src": "", "description": "PDF file, max 10MB" },
-                { "key": "total_pages", "value": "5", "type": "text" },
-                { "key": "color_mode", "value": "bw", "type": "text", "description": "bw or color" },
-                { "key": "copies", "value": "1", "type": "text" },
-                { "key": "binding", "value": "false", "type": "text" },
-                { "key": "notes", "value": "Please print double-sided", "type": "text" }
-              ]
-            },
-            "description": "Multipart/form-data. Attach a real PDF to the `file` field."
-          }
         },
         {
-          "name": "List My Print Orders",
+          "name": "Update My Shop",
           "request": {
-            "method": "GET",
-            "url": {
-              "raw": "{{base_url}}/orders/print",
-              "host": ["{{base_url}}"],
-              "path": ["orders", "print"],
-              "query": [
-                { "key": "status", "value": "pending", "disabled": true, "description": "Filter: pending | confirmed | processing | ready_for_pickup | completed | cancelled" }
-              ]
-            },
-            "header": [
-              { "key": "Authorization", "value": "Bearer {{token}}" },
-              { "key": "Accept", "value": "application/json" }
-            ]
-          }
-        },
-        {
-          "name": "Get Print Order Detail",
-          "request": {
-            "method": "GET",
-            "url": {
-              "raw": "{{base_url}}/orders/print/:id",
-              "host": ["{{base_url}}"],
-              "path": ["orders", "print", ":id"],
-              "variable": [{ "key": "id", "value": "<order_id>" }]
-            },
-            "header": [
-              { "key": "Authorization", "value": "Bearer {{token}}" },
-              { "key": "Accept", "value": "application/json" }
-            ]
-          }
-        },
-        {
-          "name": "Cancel Print Order",
-          "request": {
-            "method": "POST",
-            "url": {
-              "raw": "{{base_url}}/orders/print/:id/cancel",
-              "host": ["{{base_url}}"],
-              "path": ["orders", "print", ":id", "cancel"],
-              "variable": [{ "key": "id", "value": "<order_id>" }]
-            },
-            "header": [
-              { "key": "Authorization", "value": "Bearer {{token}}" },
-              { "key": "Accept", "value": "application/json" }
-            ]
-          }
-        },
-        {
-          "name": "Submit Print Order Review",
-          "request": {
-            "method": "POST",
-            "url": {
-              "raw": "{{base_url}}/orders/print/:id/review",
-              "host": ["{{base_url}}"],
-              "path": ["orders", "print", ":id", "review"],
-              "variable": [{ "key": "id", "value": "<order_id>" }]
-            },
+            "method": "PUT",
+            "url": "{{base_url}}/shops/me",
             "header": [
               { "key": "Authorization", "value": "Bearer {{token}}" },
               { "key": "Content-Type", "value": "application/json" },
@@ -516,208 +855,8 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"rating\": 5,\n  \"comment\": \"Fast and good quality!\"\n}"
-            },
-            "description": "Order must be in `completed` status."
-          }
-        }
-      ]
-    },
-    {
-      "name": "Print Orders (Partner)",
-      "item": [
-        {
-          "name": "List Shop Print Orders",
-          "request": {
-            "method": "GET",
-            "url": {
-              "raw": "{{base_url}}/partner/orders/print",
-              "host": ["{{base_url}}"],
-              "path": ["partner", "orders", "print"],
-              "query": [
-                { "key": "status", "value": "pending", "disabled": true, "description": "Filter by status" }
-              ]
-            },
-            "header": [
-              { "key": "Authorization", "value": "Bearer {{token}}" },
-              { "key": "Accept", "value": "application/json" }
-            ]
-          }
-        },
-        {
-          "name": "Advance Print Order Status",
-          "request": {
-            "method": "PATCH",
-            "url": {
-              "raw": "{{base_url}}/partner/orders/print/:id/status",
-              "host": ["{{base_url}}"],
-              "path": ["partner", "orders", "print", ":id", "status"],
-              "variable": [{ "key": "id", "value": "<order_id>" }]
-            },
-            "header": [
-              { "key": "Authorization", "value": "Bearer {{token}}" },
-              { "key": "Content-Type", "value": "application/json" },
-              { "key": "Accept", "value": "application/json" }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"status\": \"confirmed\"\n}",
-              "description": "Valid transitions: pending→confirmed→processing→ready_for_pickup→completed"
+              "raw": "{\n  \"shop_name\": \"Jane Print Shop Updated\",\n  \"shop_address\": \"Jl. Baru No. 99, Jakarta\",\n  \"shop_phone\": \"08198765432\"\n}"
             }
-          }
-        }
-      ]
-    },
-    {
-      "name": "ATK Orders (Customer)",
-      "item": [
-        {
-          "name": "Place ATK Order",
-          "request": {
-            "method": "POST",
-            "url": "{{base_url}}/orders/atk",
-            "header": [
-              { "key": "Authorization", "value": "Bearer {{token}}" },
-              { "key": "Content-Type", "value": "application/json" },
-              { "key": "Accept", "value": "application/json" }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"shop_id\": \"<shop_id>\",\n  \"items\": [\n    { \"atk_id\": \"<atk_product_id>\", \"quantity\": 2 },\n    { \"atk_id\": \"<atk_product_id_2>\", \"quantity\": 1 }\n  ],\n  \"notes\": \"Please wrap carefully\"\n}"
-            }
-          }
-        },
-        {
-          "name": "List My ATK Orders",
-          "request": {
-            "method": "GET",
-            "url": {
-              "raw": "{{base_url}}/orders/atk",
-              "host": ["{{base_url}}"],
-              "path": ["orders", "atk"],
-              "query": [
-                { "key": "status", "value": "pending", "disabled": true, "description": "Filter by status" }
-              ]
-            },
-            "header": [
-              { "key": "Authorization", "value": "Bearer {{token}}" },
-              { "key": "Accept", "value": "application/json" }
-            ]
-          }
-        },
-        {
-          "name": "Get ATK Order Detail",
-          "request": {
-            "method": "GET",
-            "url": {
-              "raw": "{{base_url}}/orders/atk/:id",
-              "host": ["{{base_url}}"],
-              "path": ["orders", "atk", ":id"],
-              "variable": [{ "key": "id", "value": "<order_id>" }]
-            },
-            "header": [
-              { "key": "Authorization", "value": "Bearer {{token}}" },
-              { "key": "Accept", "value": "application/json" }
-            ]
-          }
-        },
-        {
-          "name": "Submit ATK Order Review",
-          "request": {
-            "method": "POST",
-            "url": {
-              "raw": "{{base_url}}/orders/atk/:id/review",
-              "host": ["{{base_url}}"],
-              "path": ["orders", "atk", ":id", "review"],
-              "variable": [{ "key": "id", "value": "<order_id>" }]
-            },
-            "header": [
-              { "key": "Authorization", "value": "Bearer {{token}}" },
-              { "key": "Content-Type", "value": "application/json" },
-              { "key": "Accept", "value": "application/json" }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"rating\": 4,\n  \"comment\": \"Good products, fast delivery!\"\n}"
-            },
-            "description": "Order must be in `completed` status."
-          }
-        }
-      ]
-    },
-    {
-      "name": "ATK Orders (Partner)",
-      "item": [
-        {
-          "name": "List Shop ATK Orders",
-          "request": {
-            "method": "GET",
-            "url": {
-              "raw": "{{base_url}}/partner/orders/atk",
-              "host": ["{{base_url}}"],
-              "path": ["partner", "orders", "atk"],
-              "query": [
-                { "key": "status", "value": "pending", "disabled": true, "description": "Filter by status" }
-              ]
-            },
-            "header": [
-              { "key": "Authorization", "value": "Bearer {{token}}" },
-              { "key": "Accept", "value": "application/json" }
-            ]
-          }
-        },
-        {
-          "name": "Advance ATK Order Status",
-          "request": {
-            "method": "PATCH",
-            "url": {
-              "raw": "{{base_url}}/partner/orders/atk/:id/status",
-              "host": ["{{base_url}}"],
-              "path": ["partner", "orders", "atk", ":id", "status"],
-              "variable": [{ "key": "id", "value": "<order_id>" }]
-            },
-            "header": [
-              { "key": "Authorization", "value": "Bearer {{token}}" },
-              { "key": "Content-Type", "value": "application/json" },
-              { "key": "Accept", "value": "application/json" }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"status\": \"confirmed\"\n}",
-              "description": "Valid transitions: pending→confirmed→processing→ready_for_pickup→completed"
-            }
-          }
-        }
-      ]
-    },
-    {
-      "name": "Reviews",
-      "item": [
-        {
-          "name": "My Reviews",
-          "request": {
-            "method": "GET",
-            "url": "{{base_url}}/reviews/me",
-            "header": [
-              { "key": "Authorization", "value": "Bearer {{token}}" },
-              { "key": "Accept", "value": "application/json" }
-            ]
-          }
-        },
-        {
-          "name": "Get Review",
-          "request": {
-            "method": "GET",
-            "url": {
-              "raw": "{{base_url}}/reviews/me/:id",
-              "host": ["{{base_url}}"],
-              "path": ["reviews", "me", ":id"],
-              "variable": [{ "key": "id", "value": "<review_id>" }]
-            },
-            "header": [
-              { "key": "Authorization", "value": "Bearer {{token}}" },
-              { "key": "Accept", "value": "application/json" }
-            ]
           }
         }
       ]
