@@ -73,7 +73,13 @@ class AuthService
             ]);
         }
 
-        return ['user' => auth('api')->user(), 'token' => $token];
+        $user = auth('api')->user();
+
+        if ($user->role === 'partner') {
+            $user->load('shop');
+        }
+
+        return ['user' => $user, 'token' => $token];
     }
 
     public function logout(): void
@@ -83,7 +89,13 @@ class AuthService
 
     public function me(): User
     {
-        return auth('api')->user();
+        $user = auth('api')->user();
+
+        if ($user->role === 'partner') {
+            $user->load('shop');
+        }
+
+        return $user;
     }
 
     public function updateAvatar(mixed $file): User
