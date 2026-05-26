@@ -21,7 +21,7 @@ class PartnerAtkOrderController extends Controller
 
         $orders = AtkOrder::where('shop_id', $shop->id)
             ->when($request->query('status'), fn($q, $s) => $q->where('status', $s))
-            ->with('user')
+            ->with(['user', 'items.product'])
             ->latest()
             ->paginate(15);
 

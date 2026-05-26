@@ -56,7 +56,7 @@ class OrderAtkService
 
             $order->items()->createMany($itemRows);
 
-            return $order->load('items');
+            return $order->load(['items', 'shop']);
         });
     }
 
@@ -64,7 +64,7 @@ class OrderAtkService
     {
         return AtkOrder::where('user_id', $user->id)
             ->when($status, fn($q) => $q->where('status', $status))
-            ->with('shop')
+            ->with(['shop', 'items.product'])
             ->latest()
             ->paginate(15);
     }
@@ -90,7 +90,7 @@ class OrderAtkService
 
         $order->update(['status' => $newStatus]);
 
-        return $order;
+        return $order->load(['user', 'items.product']);
     }
 
     private function validateAndLoadProducts(string $shopId, array $items): array

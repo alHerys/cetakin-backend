@@ -100,7 +100,7 @@ class OrderPrintingService
 
         $order->update(['status' => $newStatus]);
 
-        return $order;
+        return $order->load('user');
     }
 
     private function calculatePrice(object $pricing, array $specs): int
