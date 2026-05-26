@@ -5,4 +5,5 @@ COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 WORKDIR /var/www/html
 COPY . .
 RUN composer install --no-dev --optimize-autoloader
-CMD until php artisan migrate --force; do echo "Waiting for DB..."; sleep 3; done && php artisan serve --host=0.0.0.0 --port=${PORT:-8000}
+RUN chmod +x start.sh
+CMD ["sh", "start.sh"]
