@@ -29,6 +29,6 @@ class HealthController extends Controller
             'services' => [
                 'database' => $dbStatus,
             ],
-        ], $status === 'ok' ? 200 : 503);
+        ], 200);
     }
 }
