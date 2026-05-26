@@ -1,6 +1,5 @@
 #!/bin/sh
 
-echo "Generating .env from environment variables..."
 php -r "
 \$vars = [
     'APP_NAME', 'APP_ENV', 'APP_KEY', 'APP_DEBUG', 'APP_URL',
@@ -10,8 +9,7 @@ php -r "
     'DB_CONNECTION', 'DB_HOST', 'DB_PORT', 'DB_DATABASE', 'DB_USERNAME', 'DB_PASSWORD',
     'SESSION_DRIVER', 'SESSION_LIFETIME', 'SESSION_ENCRYPT', 'SESSION_PATH', 'SESSION_DOMAIN',
     'BROADCAST_CONNECTION', 'FILESYSTEM_DISK', 'QUEUE_CONNECTION',
-    'CACHE_STORE', 'MEMCACHED_HOST',
-    'REDIS_CLIENT',
+    'CACHE_STORE', 'MEMCACHED_HOST', 'REDIS_CLIENT',
     'JWT_SECRET', 'JWT_TTL', 'JWT_REFRESH_TTL',
     'CLOUDINARY_URL',
 ];
@@ -23,11 +21,10 @@ foreach (\$vars as \$key) {
     }
 }
 file_put_contents('.env', implode(PHP_EOL, \$lines) . PHP_EOL);
-echo 'Done.' . PHP_EOL;
-"
+" 2>&1
 
-echo "Running migrations..."
-php artisan migrate --force
+php artisan migrate --force 2>&1
 
-echo "Starting server on port ${PORT:-8000}..."
-php artisan serve --host=0.0.0.0 --port=${PORT:-8000}
+php artisan config:clear 2>&1
+
+exec php artisan serve --host=0.0.0.0 --port=${PORT:-8000} 2>&1
