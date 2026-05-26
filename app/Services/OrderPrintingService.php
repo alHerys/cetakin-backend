@@ -23,17 +23,19 @@ class OrderPrintingService
 
     public function createOrder(User $user, array $data, UploadedFile $file): PrintOrder
     {
-        return DB::transaction(function () use ($user, $data, $file) {
-            $shop    = Shop::findOrFail($data['shop_id']);
-            $pricing = $shop->pricing;
+        $shop    = Shop::findOrFail($data['shop_id']);
+        $pricing = $shop->pricing;
 
-            if (!$pricing) {
-                throw ValidationException::withMessages([
-                    'shop_id' => ['This shop has not set up pricing yet.'],
-                ]);
-            }
+        if (!$pricing) {
+            throw ValidationException::withMessages([
+                'shop_id' => ['This shop has not set up pricing yet.'],
+            ]);
+        }
 
-            $fileUrl    = $this->cloudinary->upload($file, 'print-orders');
+        // Upload file outside transaction to avoid holding DB locks during slow network I/O
+        $fileUrl = $this->cloudinary->upload($file, 'print-orders');
+
+        return DB::transaction(function () use ($user, $data, $shop, $pricing, $fileUrl) {
             $finalPrice = $this->calculatePrice($pricing, $data);
 
             return PrintOrder::create([
